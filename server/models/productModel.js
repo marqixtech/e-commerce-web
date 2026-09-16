@@ -116,6 +116,62 @@ const productModel = {
     );
     return rows;
   },
+
+  // ---------- Admin: create/update/delete ----------
+  async create({ name, description, price, stock, categoryId, brand, isFeatured, isDeal, discountPct }) {
+    const { rows } = await db.query(
+      `insert into products (name, description, price, stock, category_id, brand, is_featured, is_deal, discount_pct)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       returning *`,
+      [
+        name,
+        description || null,
+        price,
+        stock || 0,
+        categoryId || null,
+        brand || null,
+        !!isFeatured,
+        !!isDeal,
+        discountPct || 0,
+      ]
+    );
+    return rows[0];
+  },
+
+  async update(id, fields) {
+    const allowed = ['name', 'description', 'price', 'stock', 'category_id', 'brand', 'is_featured', 'is_deal', 'discount_pct'];
+    const sets = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(fields)) {
+      if (allowed.includes(key) && value !== undefined) {
+        values.push(value);
+        sets.push(`${key} = $${values.length}`);
+      }
+    }
+
+    if (sets.length === 0) return this.findById(id);
+
+    values.push(id);
+    const { rows } = await db.query(
+      `update products set ${sets.join(', ')} where id = $${values.length} returning *`,
+      values
+    );
+    return rows[0];
+  },
+
+  async remove(id) {
+    const { rows } = await db.query('delete from products where id = $1 returning *', [id]);
+    return rows[0];
+  },
+
+  async addImage(productId, imageUrl, sortOrder = 0) {
+    const { rows } = await db.query(
+      'insert into product_images (product_id, image_url, sort_order) values ($1, $2, $3) returning *',
+      [productId, imageUrl, sortOrder]
+    );
+    return rows[0];
+  },
 };
 
 module.exports = productModel;

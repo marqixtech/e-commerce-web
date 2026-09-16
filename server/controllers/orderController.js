@@ -35,6 +35,12 @@ const getMyOrders = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { orders } });
 });
 
+// GET /api/orders/admin/all  (admin only) — every order, all users
+const getAllOrders = asyncHandler(async (req, res) => {
+  const orders = await orderModel.findAll();
+  res.json({ success: true, data: { orders } });
+});
+
 // GET /api/orders/:id  — order detail + items + status timeline (tracking)
 const getOrderById = asyncHandler(async (req, res) => {
   const order = await orderModel.findById(req.params.id);
@@ -76,4 +82,4 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Order status updated', data: { order } });
 });
 
-module.exports = { checkout, getMyOrders, getOrderById, updateOrderStatus };
+module.exports = { checkout, getMyOrders, getAllOrders, getOrderById, updateOrderStatus };

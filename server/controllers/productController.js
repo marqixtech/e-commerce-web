@@ -62,4 +62,64 @@ const getCategories = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { categories } });
 });
 
-module.exports = { getProducts, getFeatured, getDeals, getProductById, getCategories };
+// ---------- Admin only ----------
+
+// POST /api/products  (admin only)
+const createProduct = asyncHandler(async (req, res) => {
+  const { name, description, price, stock, categoryId, brand, isFeatured, isDeal, discountPct, imageUrl } = req.body;
+
+  if (!name || price === undefined) {
+    res.statusCode = 400;
+    throw new Error('name and price are required');
+  }
+
+  const product = await productModel.create({
+    name, description, price, stock, categoryId, brand, isFeatured, isDeal, discountPct,
+  });
+
+  if (imageUrl) {
+    await productModel.addImage(product.id, imageUrl, 0);
+  }
+
+  res.status(201).json({ success: true, message: 'Product created', data: { product } });
+});
+
+// PUT /api/products/:id  (admin only)
+const updateProduct = asyncHandler(async (req, res) => {
+  const existing = await productModel.findById(req.params.id);
+  if (!existing) {
+    res.statusCode = 404;
+    throw new Error('Product not found');
+  }
+
+  const { categoryId, isFeatured, isDeal, discountPct, ...rest } = req.body;
+  const fields = { ...rest };
+  if (categoryId !== undefined) fields.category_id = categoryId;
+  if (isFeatured !== undefined) fields.is_featured = isFeatured;
+  if (isDeal !== undefined) fields.is_deal = isDeal;
+  if (discountPct !== undefined) fields.discount_pct = discountPct;
+
+  const product = await productModel.update(req.params.id, fields);
+  res.json({ success: true, message: 'Product updated', data: { product } });
+});
+
+// DELETE /api/products/:id  (admin only)
+const deleteProduct = asyncHandler(async (req, res) => {
+  const deleted = await productModel.remove(req.params.id);
+  if (!deleted) {
+    res.statusCode = 404;
+    throw new Error('Product not found');
+  }
+  res.json({ success: true, message: 'Product deleted' });
+});
+
+module.exports = {
+  getProducts,
+  getFeatured,
+  getDeals,
+  getProductById,
+  getCategories,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+};

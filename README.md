@@ -408,13 +408,48 @@ works correctly. Your Supabase database needs no separate deployment step
 
 ---
 
+## Stage 11: Admin Dashboard
+
+A dashboard for managing products and orders, separate from the customer
+storefront.
+
+**How to become an admin:** there's intentionally no public signup path
+for this (you don't want random users making themselves admins). Instead,
+register a normal account through the app, then promote it manually via
+SQL in the Supabase SQL Editor:
+
+```sql
+update users set role = 'admin' where email = 'your-email@example.com';
+```
+
+Log out and back in (or just refresh — the JWT is re-checked via `/api/auth/me`
+on load) and you'll see a new **⚙️ Admin** link appear in the header.
+
+**What's in the dashboard (`/admin`):**
+- **Products** (`/admin/products`) — table of all products with Edit/Delete,
+  plus a form to create new ones (name, description, price, stock,
+  category, brand, image URL, featured/deal flags, discount %).
+- **Orders** (`/admin/orders`) — every order across all customers (not just
+  your own), with a status dropdown per row that calls
+  `PUT /api/orders/:id/status` — this is what actually drives the tracking
+  timeline customers see on their Order Detail page.
+
+**Backend:** all of this was already protected server-side before the UI
+existed — `requireRole('admin')` middleware guards `POST/PUT/DELETE
+/api/products`, `GET /api/orders/admin/all`, and `PUT /api/orders/:id/status`.
+The frontend adds `AdminRoute` (redirects non-admins away from `/admin/*`)
+and the dashboard UI on top of that existing protection.
+
+---
+
 ## 🎉 Project status: complete
 
 Every feature from the original spec is built and tested end-to-end:
 browsing, search, category filters, wishlist, cart, registration/login,
 checkout, order placement, order tracking, and product reviews — backed
 by a real PostgreSQL (Supabase) database, secured with JWT + bcrypt, and
-ready to deploy.
+ready to deploy. An admin dashboard for managing products and orders is
+included as well.
 
 ## Roadmap
 - [x] Stage 1: Project scaffold + database schema
@@ -427,3 +462,4 @@ ready to deploy.
 - [x] Stage 8: Home, listing, product details pages
 - [x] Stage 9: Cart, wishlist, checkout, order history, reviews UI
 - [x] Stage 10: Mobile responsiveness + deployment guide
+- [x] Stage 11: Admin Dashboard (product & order management)

@@ -651,3 +651,9 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin order status dropdown - reuses status-badge colors but needs to look clickable */
+select.status-badge {
+  cursor: pointer;
+  padding: 4px 8px;
+}

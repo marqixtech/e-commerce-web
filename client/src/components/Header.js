@@ -40,6 +40,7 @@ export default function Header() {
           </Link>
           {isAuthenticated ? (
             <>
+              {user?.role === 'admin' && <Link to="/admin">⚙️ Admin</Link>}
               <Link to="/orders">👤 {user?.full_name?.split(' ')[0] || 'Account'}</Link>
               <button onClick={logout}>Logout</button>
             </>

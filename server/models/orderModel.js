@@ -91,6 +91,17 @@ const orderModel = {
     return rows;
   },
 
+  // Admin only: every order across all users, with customer name/email joined in
+  async findAll() {
+    const { rows } = await db.query(
+      `select o.*, u.full_name as customer_name, u.email as customer_email
+       from orders o
+       join users u on u.id = o.user_id
+       order by o.created_at desc`
+    );
+    return rows;
+  },
+
   async findById(orderId) {
     const { rows } = await db.query('select * from orders where id = $1', [orderId]);
     return rows[0];
