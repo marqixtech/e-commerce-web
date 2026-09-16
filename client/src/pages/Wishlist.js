@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 
@@ -7,7 +7,6 @@ export default function Wishlist() {
   const { items, loading, toggle } = useWishlist();
   const { addItem } = useCart();
   const [busyId, setBusyId] = useState(null);
-  const navigate = useNavigate();
 
   async function handleRemove(productId) {
     setBusyId(productId);
